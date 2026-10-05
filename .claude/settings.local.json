@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"C:/Users/imaze/Desktop/folder_final try/server\")",
+      "Bash(mkdir -p \"C:/Users/imaze/Desktop/folder_final try/extension/icons\")",
+      "Bash(python generate_icons.py)"
+    ]
+  }
+}

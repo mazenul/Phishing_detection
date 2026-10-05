@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SurfShield</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- ── Header ─────────────────────────────────────────── -->
+    <div class="header">
+      <div class="header-left">
+        <span class="shield-icon">🛡</span>
+        <span class="brand">SurfShield</span>
+      </div>
+      <div class="header-right">
+        <span class="ai-badge">AI</span>
+      </div>
+    </div>
+
+    <!-- ── Loading state ──────────────────────────────────── -->
+    <div id="stateLoading" class="state-panel">
+      <div class="spinner"></div>
+      <p class="state-msg">Analyzing URL...</p>
+    </div>
+
+    <!-- ── Not applicable state (non-http page) ───────────── -->
+    <div id="stateNA" class="state-panel" style="display:none">
+      <div class="na-icon">—</div>
+      <p class="state-msg">Not a web page</p>
+      <p class="state-sub">SurfShield only analyzes http/https URLs.</p>
+    </div>
+
+    <!-- ── Server offline state ───────────────────────────── -->
+    <div id="stateError" class="state-panel" style="display:none">
+      <div class="error-icon">⚠</div>
+      <p class="state-msg">Server Offline</p>
+      <p class="state-sub">Start the local server:<br/><code>start_server.bat</code></p>
+    </div>
+
+    <!-- ── Result state ───────────────────────────────────── -->
+    <div id="stateResult" style="display:none">
+
+      <!-- Score ring + verdict -->
+      <div class="score-section">
+        <div class="score-ring" id="scoreRing">
+          <span class="score-number" id="scoreNumber">--</span>
+          <span class="score-max">/100</span>
+        </div>
+        <div class="verdict-badge" id="verdictBadge">--</div>
+      </div>
+
+      <!-- Risk bar -->
+      <div class="risk-bar-wrap">
+        <div class="risk-bar-track">
+          <div class="risk-bar-fill" id="riskBarFill"></div>
+        </div>
+        <div class="risk-bar-labels">
+          <span class="safe-lbl">Safe</span>
+          <span class="sus-lbl">Suspicious</span>
+          <span class="unsafe-lbl">Unsafe</span>
+        </div>
+      </div>
+
+      <!-- Model cards -->
+      <div class="models-section">
+
+        <!-- Analysis type badge -->
+        <div class="analysis-badge" id="analysisBadge">Full Analysis</div>
+
+        <!-- DL card -->
+        <div class="model-card">
+          <div class="model-card-header">
+            <span class="model-name">Deep Learning</span>
+            <span class="model-tag">Transformer</span>
+          </div>
+          <div class="model-stats">
+            <div class="stat-row">
+              <span class="stat-label">Phishing Probability</span>
+              <span class="stat-value" id="dlProb">--</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Confidence</span>
+              <span class="stat-value" id="dlConf">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ML card -->
+        <div class="model-card" id="mlCard">
+          <div class="model-card-header">
+            <span class="model-name">Machine Learning</span>
+            <span class="model-tag">LightGBM</span>
+          </div>
+          <div class="model-stats" id="mlStats">
+            <div class="stat-row">
+              <span class="stat-label">Phishing Probability</span>
+              <span class="stat-value" id="mlProb">--</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Confidence</span>
+              <span class="stat-value" id="mlConf">--</span>
+            </div>
+          </div>
+          <div class="ml-unavailable" id="mlUnavailable" style="display:none">
+            ⚠ Feature extraction failed — DL only
+          </div>
+        </div>
+
+      </div>
+
+      <!-- URL + re-analyze -->
+      <div class="url-section">
+        <span class="url-label">URL</span>
+        <span class="url-text" id="urlText" title="">--</span>
+      </div>
+      <button class="reanalyze-btn" id="reanalyzeBtn">↻ Re-Analyze</button>
+
+    </div>
+    <!-- /stateResult -->
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

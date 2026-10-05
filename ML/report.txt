@@ -1,0 +1,233 @@
+================================================================
+  LIGHTGBM PHISHING DETECTION MODEL — FULL REPORT
+  Date: 2026-04-25
+================================================================
+
+
+----------------------------------------------------------------
+  1. DATASET SUMMARY
+----------------------------------------------------------------
+
+  File            : ml_balanced.csv
+  Total Samples   : 208,862
+  Total Features  : 49
+  Class 0 (legit) : 104,431 (50.0%)
+  Class 1 (phish) : 104,431 (50.0%)
+  Balance         : Perfectly balanced — no class weighting needed
+  Missing Values  : None (null). -1 values used as missing indicator,
+                    handled natively by LightGBM.
+
+
+----------------------------------------------------------------
+  2. MODEL DETAILS
+----------------------------------------------------------------
+
+  Algorithm       : LightGBM (LGBMClassifier)
+  Task            : Binary Classification (0 = Legit, 1 = Phishing)
+  Saved File      : lightgbm_model.pkl
+  File Size       : ~2.5 MB
+  Serialization   : joblib
+
+  Hyperparameters:
+    n_estimators      = 500
+    learning_rate     = 0.05
+    max_depth         = 7
+    num_leaves        = 63
+    min_child_samples = 20
+    subsample         = 0.8
+    colsample_bytree  = 0.8
+    reg_alpha (L1)    = 0.1
+    reg_lambda (L2)   = 0.1
+    random_state      = 42
+    n_jobs            = -1  (uses all CPU cores)
+
+  Note: Hyperparameters were selected and confirmed via
+  5-Fold Stratified Cross-Validation before full training.
+
+
+----------------------------------------------------------------
+  3. TRAINING DETAILS
+----------------------------------------------------------------
+
+  Training Strategy : Trained on 100% of the dataset.
+                      Model selection was done via K-Fold CV
+                      BEFORE this final training run — this is
+                      the standard and correct approach.
+
+  Training Time     : ~2.6 seconds
+  Training Script   : train_lightgbm.py
+
+
+----------------------------------------------------------------
+  4. MODEL PERFORMANCE
+----------------------------------------------------------------
+
+  --- 5-Fold Stratified Cross-Validation (pre-training estimate) ---
+
+    Accuracy   : 0.9900 +/- 0.0004
+    Precision  : 0.9947 +/- 0.0005
+    Recall     : 0.9852 +/- 0.0010
+    F1-Score   : 0.9899 +/- 0.0004
+    ROC-AUC    : 0.9978 +/- 0.0002
+
+  --- Holdout Test Set (80/20 split, stratified) ---
+
+    Train size : 167,089
+    Test size  :  41,773
+    Accuracy   : 0.9898
+    Precision  : 0.9941
+    Recall     : 0.9855
+    F1-Score   : 0.9898
+    ROC-AUC    : 0.9979
+
+    Confusion Matrix:
+      TN = 20,765   FP = 122
+      FN =    302   TP = 20,584
+
+  --- In-Sample (full dataset, for reference only) ---
+
+    Accuracy   : 0.9922
+    Precision  : 0.9963
+    Recall     : 0.9880
+    F1-Score   : 0.9921
+    ROC-AUC    : 0.9990
+
+  Overfitting Gap (train - holdout): +0.0023 — HEALTHY
+
+
+----------------------------------------------------------------
+  5. TOP 10 MOST IMPORTANT FEATURES
+----------------------------------------------------------------
+
+   1.  domain_entropy             (score: 6089)
+   2.  url_length                 (score: 5913)
+   3.  domain_length              (score: 3597)
+   4.  url_special_char_count     (score: 1684)
+   5.  url_dot_count              (score: 1646)
+   6.  url_subdomain_count        (score:  922)
+   7.  uses_url_shortener         (score:  478)
+   8.  url_prefix_suffix_dash     (score:  477)
+   9.  domain_has_numerics        (score:  448)
+  10.  url_has_suspicious_kw      (score:  387)
+
+
+----------------------------------------------------------------
+  6. HOW TO USE THE MODEL
+----------------------------------------------------------------
+
+  REQUIREMENTS:
+    pip install lightgbm joblib pandas scikit-learn
+
+
+  --- A. Load and predict on new data (from a CSV file) ---
+
+    import pandas as pd
+    import joblib
+
+    # Load model
+    model = joblib.load("lightgbm_model.pkl")
+
+    # Load your new data (must have same 49 features, no label column)
+    new_data = pd.read_csv("your_new_data.csv")
+
+    # Predict class (0 = Legit, 1 = Phishing)
+    predictions = model.predict(new_data)
+
+    # Predict probability scores (column 1 = phishing probability)
+    probabilities = model.predict_proba(new_data)[:, 1]
+
+    print(predictions)      # e.g. [0, 1, 0, 1, 0]
+    print(probabilities)    # e.g. [0.02, 0.98, 0.05, 0.97, 0.01]
+
+
+  --- B. Predict on a single URL sample ---
+
+    import pandas as pd
+    import joblib
+
+    model = joblib.load("lightgbm_model.pkl")
+
+    # Build a single-row DataFrame with all 49 feature values
+    # Use -1 for any feature that could not be extracted
+    sample = pd.DataFrame([{
+        "url_has_ip"               : 0,
+        "url_length"               : 75,
+        "url_length_flag"          : 1,
+        "uses_url_shortener"       : 0,
+        "url_has_at_symbol"        : 0,
+        "url_double_slash_redirect": 0,
+        "url_prefix_suffix_dash"   : 1,
+        "url_subdomain_count"      : 3,
+        "url_subdomain_flag"       : 1,
+        "url_special_char_count"   : 5,
+        "url_has_suspicious_kw"    : 1,
+        "url_dot_count"            : 4,
+        # ... fill remaining 37 features the same way ...
+    }])
+
+    pred  = model.predict(sample)[0]
+    prob  = model.predict_proba(sample)[0][1]
+
+    label = "PHISHING" if pred == 1 else "LEGIT"
+    print(f"Prediction : {label}")
+    print(f"Confidence : {prob:.2%}")
+
+
+  --- C. Evaluate against a labelled test set ---
+
+    import pandas as pd
+    import joblib
+    from sklearn.metrics import classification_report, roc_auc_score
+
+    model   = joblib.load("lightgbm_model.pkl")
+    test_df = pd.read_csv("test_data.csv")
+
+    X_test  = test_df.drop(columns=["label"])
+    y_test  = test_df["label"]
+
+    y_pred  = model.predict(X_test)
+    y_prob  = model.predict_proba(X_test)[:, 1]
+
+    print(classification_report(y_test, y_pred,
+                                target_names=["Legit", "Phishing"]))
+    print(f"ROC-AUC: {roc_auc_score(y_test, y_prob):.4f}")
+
+
+  --- D. Get feature importance ---
+
+    import joblib
+    import pandas as pd
+
+    model = joblib.load("lightgbm_model.pkl")
+
+    feature_names = model.feature_name_
+    importances   = model.feature_importances_
+
+    importance_df = pd.DataFrame({
+        "feature"   : feature_names,
+        "importance": importances
+    }).sort_values("importance", ascending=False)
+
+    print(importance_df.head(10))
+
+
+----------------------------------------------------------------
+  7. IMPORTANT NOTES
+----------------------------------------------------------------
+
+  - Input features must be in the EXACT same order and names
+    as the training data. Use -1 for unavailable features.
+
+  - Output classes: 0 = Legitimate, 1 = Phishing
+
+  - The model was validated via 5-Fold CV (ROC-AUC = 0.9978)
+    before training on the full dataset. This is the correct
+    and standard workflow for production model training.
+
+  - Do NOT retrain the model unless you have new data or want
+    to tune hyperparameters, as the current performance is
+    already excellent (F1 ~99%).
+
+================================================================
+  END OF REPORT
+================================================================

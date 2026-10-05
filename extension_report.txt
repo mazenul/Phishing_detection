@@ -1,0 +1,511 @@
+================================================================================
+  SURFSHIELD — COMPLETE PROJECT REPORT
+  Phishing URL Detection Chrome Extension
+  Powered by Deep Learning (Transformer) + Machine Learning (LightGBM)
+================================================================================
+
+Last updated : 2026-04-25
+Project root : C:\Users\imaze\Desktop\folder_final try\
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 1. PROJECT OVERVIEW
+────────────────────────────────────────────────────────────────────────────────
+
+SurfShield is a Chrome browser extension that detects phishing URLs in real time
+using two pre-trained AI models running on a local Python (FastAPI) server.
+
+The extension has two operating modes:
+  A) AUTO — Analyzes the URL of every page the user navigates to.
+             The extension icon changes color to reflect the risk level.
+  B) MANUAL — User right-clicks any hyperlink on a page and selects
+              "Check link with SurfShield". A toast notification appears
+              at the bottom-right of the page with the result — without
+              visiting the link.
+
+Both modes call the same backend API endpoint and use the same fusion logic.
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 2. COMPLETE DIRECTORY STRUCTURE
+────────────────────────────────────────────────────────────────────────────────
+
+folder_final try\
+│
+├── DL\                              Deep Learning model files
+│   ├── phishing_transformer.py      Original training script (reference only)
+│   ├── best_model.pt                Saved Transformer weights (383 KB, PyTorch)
+│   ├── vocab.json                   Character vocabulary mapping (174 chars)
+│   ├── url_dataset_cleaned.csv      Training dataset (450k URLs, 33 MB)
+│   └── training_curves.png          Training visualization (accuracy/loss/AUC)
+│
+├── ML\                              Machine Learning model files
+│   ├── train_lightgbm.py            Original training script (reference only)
+│   ├── predict_url.py               Original CLI inference script (reference)
+│   ├── analyze_model.py             Model diagnostics script
+│   ├── kfold_verification.py        Cross-validation script
+│   ├── lightgbm_model.pkl           Saved LightGBM model (2.5 MB, joblib)
+│   ├── ml_balanced.csv              Training dataset (208k URLs x 49 features)
+│   ├── report.txt                   Original model documentation
+│   └── details.txt                  Empty placeholder file
+│
+├── server\                          FastAPI backend server
+│   ├── main.py                      API server — entry point
+│   ├── fusion.py                    Confidence-weighted fusion formula
+│   ├── dl_model.py                  DL model loader and inference
+│   ├── ml_model.py                  ML feature extraction and inference
+│   ├── requirements.txt             Python dependencies
+│   └── start_server.bat             Double-click to start the server
+│
+├── extension\                       Chrome Extension (Manifest V3)
+│   ├── manifest.json                Extension config and permissions
+│   ├── background.js                Service worker — auto-detection + context menu
+│   ├── popup.html                   Popup UI layout
+│   ├── popup.css                    Popup styling (dark theme)
+│   ├── popup.js                     Popup logic — reads stored results
+│   └── icons\
+│       ├── generate_icons.py        One-time icon generator (pure Python stdlib)
+│       ├── safe_48.png              Green circle icon (safe verdict)
+│       ├── suspicious_48.png        Orange circle icon (suspicious verdict)
+│       ├── unsafe_48.png            Red circle icon (unsafe verdict)
+│       └── loading_48.png           Gray circle icon (loading / error state)
+│
+└── extension_report.txt             This file
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 3. THE TWO AI MODELS
+────────────────────────────────────────────────────────────────────────────────
+
+Both models solve the same binary classification task:
+  0 = Legitimate URL
+  1 = Phishing URL
+
+─── 3A. DEEP LEARNING — Character-Level Transformer ────────────────────────────
+
+File           : DL\best_model.pt  +  DL\vocab.json
+Server module  : server\dl_model.py
+
+Architecture:
+  - Input      : Raw URL string (no feature engineering needed)
+  - Encoding   : Each character mapped to an integer index via vocab.json
+                 MAX_LEN = 200 characters (truncate/pad to this length)
+                 Vocab size = 174 unique characters
+                 Index 0 = <PAD>, Index 1 = <UNK>
+  - Embedding  : nn.Embedding(vocab_size, embed_dim=64, padding_idx=0)
+  - Positional : Sine/cosine positional encoding
+  - Blocks     : 2 x TransformerBlock
+                   Each block: MultiheadAttention (4 heads) + LayerNorm + FFN(128)
+  - Pooling    : Mean pooling over sequence dimension
+  - Head       : Linear(64, 64) → ReLU → Dropout(0.1) → Linear(64, 1)
+  - Output     : Single logit → sigmoid → phishing probability [0, 1]
+
+Training details:
+  - Dataset    : url_dataset_cleaned.csv (450,169 URLs)
+  - Split      : 80% train / 10% val / 10% test (stratified)
+  - Loss       : BCEWithLogitsLoss with class-weight balancing
+  - Optimizer  : Adam (lr=0.001)
+  - Scheduler  : ReduceLROnPlateau (factor=0.5, patience=2)
+  - Early stop : patience=3 on validation AUC
+  - Device     : CUDA GPU (falls back to CPU for inference)
+
+Inference (server\dl_model.py):
+  1. Load vocab.json into memory
+  2. Load best_model.pt state dict
+  3. For each URL: encode chars → tensor → model forward pass → sigmoid
+  4. Returns float probability in [0, 1]
+
+─── 3B. MACHINE LEARNING — LightGBM Gradient Boosting ─────────────────────────
+
+File           : ML\lightgbm_model.pkl
+Server module  : server\ml_model.py
+
+Input features : 49 hand-engineered features extracted per URL:
+
+  URL-level (11):
+    url_has_ip, url_length, url_length_flag, uses_url_shortener,
+    url_has_at_symbol, url_double_slash_redirect, url_prefix_suffix_dash,
+    url_subdomain_count, url_subdomain_flag, url_special_char_count,
+    url_has_suspicious_kw, url_dot_count
+
+  Domain-level (9):
+    domain_length, domain_has_numerics, domain_entropy, domain_dot_count,
+    https_in_domain_token, tld_suspicious, non_standard_port,
+    dns_record_exists, ssl_final_state
+
+  Always -1 / API-dependent (7):
+    domain_reg_length_flag, domain_age_flag, web_traffic_flag,
+    pagerank_flag, google_index_flag, links_pointing_flag,
+    statistical_report_flag
+    NOTE: These are ALWAYS -1. The model was trained with -1 for these.
+          They are NOT failures — they are expected missing values.
+
+  HTML-level (13):
+    favicon_external, html_external_req_ratio, html_anchor_url_ratio,
+    html_links_meta_script, html_sfh_suspicious, html_submits_to_email,
+    html_abnormal_url, html_redirect_count, html_status_bar_custom,
+    html_disables_right_click, html_uses_popup, html_uses_iframe,
+    html_form_count
+    NOTE: These require HTTP fetch + BeautifulSoup parsing.
+          If DNS fails or requests/bs4 not installed, these are -1.
+
+  Secondary mirrors (9):
+    sec_domain_age_flag, sec_dns_record_exists, sec_web_traffic_flag,
+    sec_links_pointing_flag, sec_statistical_report_flag, sec_ssl_state,
+    sec_tld_suspicious, sec_has_suspicious_kw
+
+Model hyperparameters:
+  n_estimators=500, learning_rate=0.05, max_depth=7, num_leaves=63,
+  min_child_samples=20, subsample=0.8, colsample_bytree=0.8,
+  reg_alpha=0.1, reg_lambda=0.1, random_state=42
+
+Performance (5-Fold CV on 208,863 balanced samples):
+  Accuracy : 99.00% ± 0.04%
+  Precision: 99.47% ± 0.05%
+  Recall   : 98.52% ± 0.10%
+  F1-Score : 99.00% ± 0.04%
+  ROC-AUC  : 99.78% ± 0.02%
+
+ML FALLBACK RULE:
+  If ANY Python exception occurs during feature extraction or model prediction,
+  predict_ml() returns None. The fusion layer then uses DL-only mode.
+  Expected -1 values (API-dependent features) are NOT considered failures.
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 4. FUSION FORMULA  (server\fusion.py)
+────────────────────────────────────────────────────────────────────────────────
+
+Both models output a phishing probability p in [0, 1].
+Confidence is defined as distance from maximum uncertainty (0.5):
+
+    confidence = |p - 0.5|      range: 0.0 (no idea) to 0.5 (fully certain)
+
+Weighted fusion:
+    final_prob = (p_dl * conf_dl + p_ml * conf_ml) / (conf_dl + conf_ml)
+    risk_score = final_prob * 100       range: 0 – 100
+
+Edge cases:
+  - ML unavailable (p_ml = None)    → use p_dl directly as risk_score/100
+  - Both confidences == 0.0         → simple average (p_dl + p_ml) / 2
+    (extremely rare: both models output exactly 0.5)
+
+Display normalization:
+  dl_confidence and ml_confidence are multiplied by 2 before returning
+  so they display in [0, 1] range (0% to 100%) in the popup.
+
+Verdict thresholds:
+    0  – 35   →  safe
+   36  – 69   →  suspicious
+   70  – 100  →  unsafe
+
+API response shape (JSON):
+  {
+    "risk_score"     : float,          0 – 100
+    "verdict"        : str,            "safe" | "suspicious" | "unsafe"
+    "dl_probability" : float,          0 – 1
+    "ml_probability" : float | null,   0 – 1, null if ML failed
+    "dl_confidence"  : float,          0 – 1 (normalized)
+    "ml_confidence"  : float | null,   0 – 1 (normalized), null if ML failed
+    "analysis_type"  : str,            "full" | "partial"
+    "url"            : str
+  }
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 5. FASTAPI SERVER  (server\)
+────────────────────────────────────────────────────────────────────────────────
+
+Entry point : server\main.py
+Start       : Double-click server\start_server.bat
+              OR: cd server && python -m uvicorn main:app --host 127.0.0.1 --port 8000
+
+Base URL    : http://127.0.0.1:8000
+
+Endpoints:
+  GET  /health    → {"status": "ok"}   (check if server is running)
+  POST /predict   → full fusion result
+                    Body: {"url": "https://example.com"}
+
+Startup sequence:
+  1. load_dl_model()   — loads vocab.json + best_model.pt into memory
+  2. load_ml_model()   — loads lightgbm_model.pkl into memory
+  Both are loaded ONCE at startup and kept in memory for all requests.
+
+CORS: allow_origins=["*"]  — required for the Chrome extension to call the API.
+
+Model file paths (resolved relative to server\main.py):
+  DL model  : ../DL/best_model.pt
+  DL vocab  : ../DL/vocab.json
+  ML model  : ../ML/lightgbm_model.pkl
+
+Install dependencies:
+  cd server
+  pip install -r requirements.txt
+
+requirements.txt contents:
+  fastapi, uvicorn[standard], torch, numpy, scikit-learn,
+  joblib, requests, beautifulsoup4, pandas, lightgbm
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 6. CHROME EXTENSION  (extension\)
+────────────────────────────────────────────────────────────────────────────────
+
+Manifest version : 3 (MV3)
+Extension name   : SurfShield
+Version          : 1.0.0
+
+Permissions:
+  tabs          — read tab URLs and IDs
+  activeTab     — access the currently active tab
+  storage       — store per-tab analysis results
+  contextMenus  — add right-click menu item on links
+  scripting     — inject toast notifications into page DOM
+
+Host permissions:
+  http://127.0.0.1:8000/*    — to call the local FastAPI server
+  <all_urls>                  — to analyze any URL
+
+─── 6A. background.js (Service Worker) ─────────────────────────────────────────
+
+Responsibilities:
+  1. Auto-detect URL on every tab navigation (tabs.onUpdated + tabs.onActivated)
+  2. Call /predict for each new URL
+  3. Update the extension icon color and badge number per tab
+  4. Register the right-click context menu item
+  5. Handle context menu clicks (check link + show toast)
+  6. Store results in chrome.storage.local keyed by tab_<tabId>
+  7. Clean up storage when tabs are closed
+
+Icon states drawn via OffscreenCanvas (no PNG files needed for tab icon):
+  Gray   (#757575) — not a web page, or loading
+  Blue   (#2196F3) — currently analyzing
+  Green  (#00c853) — safe   (score 0–35)
+  Orange (#ff9800) — suspicious (score 36–69)
+  Red    (#f44336) — unsafe  (score 70–100)
+
+Badge: shows the numeric risk score (e.g. "72") on the extension icon.
+
+Storage format per tab:
+  key: "tab_<tabId>"
+  value (loading) : { status: "loading", url }
+  value (done)    : { status: "done", risk_score, verdict, dl_probability,
+                      ml_probability, dl_confidence, ml_confidence,
+                      analysis_type, url }
+  value (error)   : { status: "error", url, error }
+  value (na)      : { status: "na", url }
+
+─── 6B. Context Menu + Toast System ────────────────────────────────────────────
+
+Context menu:
+  - Registered once via chrome.runtime.onInstalled
+  - ID: "surfshield_check_link"
+  - Shown only when right-clicking a hyperlink (contexts: ["link"])
+  - Label: "Check link with SurfShield"
+
+Toast notification (NOT chrome.notifications — see note below):
+  - Injected into the active tab's DOM via chrome.scripting.executeScript()
+  - DOM element ID: "__surfshield_toast__"
+  - Positioned fixed bottom-right, z-index 2147483647
+  - Dark background #1e293b with colored left border
+  - Slide-up entrance animation (0.22s)
+  - Auto-dismisses after 7 seconds
+  - Manual close button (✕)
+
+WHY TOAST INSTEAD OF chrome.notifications:
+  chrome.notifications.create() depends on Windows notification settings
+  and Chrome notification permissions. If either is blocked, notifications
+  silently fail with no error. The scripting injection approach bypasses
+  all OS permissions and always works.
+
+Toast stages for right-click check:
+  Stage 1 (immediate): 🔍  "SurfShield — Checking link…"
+  Stage 2 (on result):
+    ✅  "Safe — Risk Score: 12 / 100"         (verdict: safe)
+    ⚠️  "Suspicious — Risk Score: 52 / 100"   (verdict: suspicious)
+    🚨  "Unsafe — Risk Score: 78 / 100"       (verdict: unsafe)
+    ❌  "SurfShield — Server Offline"         (on error)
+
+  Sub-line: "DL: 78.2%  |  ML: 69.4%"
+        or: "Partial analysis — DL only (feature extraction failed)"
+
+─── 6C. popup.html / popup.css / popup.js ──────────────────────────────────────
+
+Triggered by: clicking the extension icon in the Chrome toolbar.
+
+Displays the stored result for the current tab. Components:
+  - Score ring     : large circular display of the numeric risk score,
+                     colored by verdict
+  - Verdict badge  : SAFE / SUSPICIOUS / UNSAFE label
+  - Risk bar       : horizontal progress bar (green → orange → red gradient)
+  - Analysis badge : "Full Analysis  •  DL + ML" or "Partial Analysis  •  DL Only"
+  - DL model card  : Phishing Probability + Confidence
+  - ML model card  : Phishing Probability + Confidence
+                     OR "Feature extraction failed — DL only" if ML is None
+  - URL display    : current URL (truncated with ellipsis)
+  - Re-Analyze btn : sends REANALYZE message to background.js, polls storage
+                     until new result arrives
+
+States handled:
+  loading  → spinner + "Analyzing URL..."
+  na       → "Not a web page" (for chrome://, file://, etc.)
+  error    → "Server Offline" + instruction to start start_server.bat
+  done     → full result view
+
+Theme: dark (#0d0d1a background, #12122a cards, #1e1e3a borders)
+
+─── 6D. icons\ ──────────────────────────────────────────────────────────────────
+
+generate_icons.py:
+  Pure Python script using only stdlib (struct, zlib).
+  Creates 4 PNG files: safe_48.png, suspicious_48.png, unsafe_48.png, loading_48.png
+  These are used ONLY for the context menu toast (legacy — currently unused since
+  toasts use emoji icons). They can be regenerated anytime by running:
+    python extension\icons\generate_icons.py
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 7. HOW TO RUN — STEP BY STEP
+────────────────────────────────────────────────────────────────────────────────
+
+Step 1 — Install Python dependencies (one time only):
+  cd "folder_final try\server"
+  pip install -r requirements.txt
+
+Step 2 — Generate extension icons (one time only):
+  python "folder_final try\extension\icons\generate_icons.py"
+
+Step 3 — Start the server:
+  Double-click: folder_final try\server\start_server.bat
+  Server will print: "Both models ready. Listening on http://127.0.0.1:8000"
+  Keep this window open while using the extension.
+
+Step 4 — Load the extension in Chrome:
+  1. Open chrome://extensions/
+  2. Enable Developer mode (toggle top-right)
+  3. Click "Load unpacked"
+  4. Select the folder: folder_final try\extension\
+  5. SurfShield appears in the toolbar.
+
+Step 5 — Use it:
+  - Browse any website → icon changes color automatically
+  - Click icon → see full risk breakdown
+  - Right-click any link → "Check link with SurfShield" → toast appears
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 8. IMPORTANT TECHNICAL NOTES
+────────────────────────────────────────────────────────────────────────────────
+
+1. SERVER MUST BE RUNNING FIRST
+   The extension makes HTTP calls to http://127.0.0.1:8000. If the server is
+   not running, the icon shows "!" badge and the popup shows "Server Offline".
+
+2. CONTEXT MENU REGISTRATION
+   The "Check link with SurfShield" menu item is registered via
+   chrome.runtime.onInstalled, which fires only once when the extension is
+   first installed or reloaded. If you reload the extension from
+   chrome://extensions/, right-click the page once to trigger the service
+   worker to re-register the menu item.
+
+3. ML FALLBACK BEHAVIOR
+   If any Python exception occurs during ML feature extraction, ml_probability
+   returns None and the fusion uses DL only (analysis_type = "partial").
+   The -1 values for WHOIS/API-dependent features are NORMAL — they were present
+   in the training data and LightGBM handles them natively.
+
+4. HTML FEATURE EXTRACTION
+   The ML model makes a real HTTP request to the target URL to extract HTML
+   features. This means:
+   - ML analysis takes longer than DL (5–15 seconds for slow sites)
+   - Some sites may block the request (features default to -1)
+   - The server needs internet access for this step
+
+5. GPU vs CPU
+   DL model loads on GPU (CUDA) if available, otherwise CPU.
+   LightGBM always runs on CPU.
+   CPU inference is fast enough for real-time use.
+
+6. TOAST vs CHROME NOTIFICATIONS
+   chrome.notifications.create() was tried first but silently failed because
+   Windows notification settings and Chrome notification permissions can block
+   it with no visible error. The solution is chrome.scripting.executeScript()
+   which injects a toast directly into the page DOM — cannot be blocked.
+
+7. EXTENSION RELOAD AFTER CODE CHANGES
+   Any change to background.js, manifest.json, or any extension file requires
+   reloading the extension in chrome://extensions/ to take effect.
+   popup.html/css/js changes take effect immediately on next popup open.
+
+8. NAME HISTORY
+   The extension was originally named "PhishGuard" during development.
+   All references were renamed to "SurfShield" including:
+   manifest.json (name + default_title), background.js (display text +
+   DOM IDs + context menu ID), popup.html, popup.js, main.py, start_server.bat,
+   generate_icons.py.
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 9. KEY CONSTANTS TO ADJUST IF NEEDED
+────────────────────────────────────────────────────────────────────────────────
+
+Risk score thresholds (server\fusion.py):
+  SAFE_MAX       = 35    (0–35   → safe)
+  SUSPICIOUS_MAX = 69    (36–69  → suspicious)
+                         (70–100 → unsafe)
+
+DL model settings (server\dl_model.py):
+  MAX_LEN    = 200    (max URL length in characters)
+  EMBED_DIM  = 64
+  NUM_HEADS  = 4
+  FF_DIM     = 128
+  NUM_BLOCKS = 2
+  DROPOUT    = 0.1
+  NOTE: These MUST match the values used during training. Do not change.
+
+Server port (server\start_server.bat + extension\background.js):
+  Port: 8000
+  If changed in start_server.bat, also update API_URL in background.js:
+    const API_URL = "http://127.0.0.1:8000/predict";
+
+Toast auto-dismiss delay (extension\background.js):
+  setTimeout(dismiss, 7000)   → 7 seconds, change to taste
+
+ML request timeout (server\ml_model.py):
+  requests.get(..., timeout=10, ...)   → 10 seconds per HTML fetch
+
+Context menu check timeout (extension\background.js):
+  setTimeout(() => controller.abort(), 30000)   → 30 seconds max wait
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 10. FEATURE IMPORTANCE (ML MODEL — TOP 10)
+────────────────────────────────────────────────────────────────────────────────
+
+Rank  Feature                  Importance
+  1   domain_entropy           6089
+  2   url_length               5913
+  3   domain_length            3597
+  4   url_special_char_count   1684
+  5   url_dot_count            1646
+  6   url_subdomain_count       922
+  7   uses_url_shortener        478
+  8   url_prefix_suffix_dash    477
+  9   domain_has_numerics       448
+ 10   url_has_suspicious_kw     387
+
+Suspicious keywords checked: login, secure, account, update, banking, confirm,
+  verify, paypal, ebay, amazon, signin, password, credential, wallet, billing,
+  support, alert, suspend, unlock, access, validation, authenticate
+
+Suspicious TLDs checked: .tk .ml .ga .cf .gq .xyz .top .club .online .site
+  .info .live .icu .buzz .fun .work .click .link .win .bid .loan
+
+URL shorteners checked: bit.ly tinyurl.com goo.gl t.co ow.ly buff.ly adf.ly
+  short.link rebrand.ly cutt.ly tiny.cc is.gd cli.gs su.pr twurl.nl snurl.com
+
+
+================================================================================
+  END OF REPORT
+================================================================================

@@ -1,0 +1,536 @@
+Windows PowerShell
+╭─── Claude Code v2.1.126 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting started                                                                │
+│                 Welcome back Sadit!                │ Run /init to create a CLAUDE.md file with instructions for Claude                       │
+│                                                    │ ─────────────────────────────────────────────────────────────────────────────────────── │
+│                       ▐▛███▜▌                      │ What's new                                                                              │
+│                      ▝▜█████▛▘                     │ `/config` settings (theme, editor mode, verbose, etc.) now persist to `~/.claude/setti… │
+│                        ▘▘ ▝▝                       │ Added `prUrlTemplate` setting to point the footer PR badge at a custom code-review URL… │
+│   Sonnet 4.6 · Claude Pro · imazenul@gmail.com's   │ Added `CLAUDE_CODE_HIDE_CWD` environment variable to hide the working directory in the… │
+│   Organization                                     │ /release-notes for more                                                                 │
+│            ~\Desktop\folder_final try\ML           │                                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+❯ i this folder there is a dataset ml_balanced.csv file i want you to analyze the dataset and show me what the features discribe what and what
+  the value of the feature discribe what
+
+● Let me read the dataset to understand its structure and features.
+
+╭─── Claude Code v2.1.126 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting started                                                                │
+│                 Welcome back Sadit!                │ Run /init to create a CLAUDE.md file with instructions for Claude                       │
+│                                                    │ ─────────────────────────────────────────────────────────────────────────────────────── │
+│                       ▐▛███▜▌                      │ What's new                                                                              │
+│                      ▝▜█████▛▘                     │ `/config` settings (theme, editor mode, verbose, etc.) now persist to `~/.claude/setti… │
+│                        ▘▘ ▝▝                       │ Added `prUrlTemplate` setting to point the footer PR badge at a custom code-review URL… │
+│   Sonnet 4.6 · Claude Pro · imazenul@gmail.com's   │ Added `CLAUDE_CODE_HIDE_CWD` environment variable to hide the working directory in the… │
+│   Organization                                     │ /release-notes for more                                                                 │
+│            ~\Desktop\folder_final try\ML           │                                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+❯ i this folder there is a dataset ml_balanced.csv file i want you to analyze the dataset and show me what the features discribe what and what
+  the value of the feature discribe what
+
+● Let me read the dataset to understand its structure and features.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Bash(cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+      import pandas as pd…)
+  ⎿  Shape: (208862, 50)
+
+     Columns: ['label', 'url_has_ip', 'url_length', 'url_length_flag', 'uses_url_shortener', 'url_has_at_symbol', 'url_double_slash_redirec
+     … +221 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+● Bash(cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+      import pandas as pd…)
+  ⎿  Shape: (208862, 50)
+
+     Label distribution:
+     … +221 lines (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Bash command
+
+   cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+   import pandas as pd
+   df = pd.read_csv('ml_balanced.csv')
+
+   # Get flag/binary columns
+   binary_cols = []
+   flag_cols = []
+
+   # Get flag/binary columns
+   binary_cols = []
+   flag_cols = []
+
+❯ i this folder there is a dataset ml_balanced.csv file i want you to analyze the dataset and show me what the features discribe what and what
+  the value of the feature discribe what
+
+● Let me read the dataset to understand its structure and features.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Bash(cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+      import pandas as pd…)
+  ⎿  Shape: (208862, 50)
+
+     Columns: ['label', 'url_has_ip', 'url_length', 'url_length_flag', 'uses_url_shortener', 'url_has_at_symbol', 'url_double_slash_redirec
+     … +221 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+● Bash(cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+      import pandas as pd…)
+  ⎿  Shape: (208862, 50)
+
+     Label distribution:
+     … +221 lines (ctrl+o to expand)
+
+● Bash(cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+      import pandas as pd…)
+  ⎿  === BINARY (0/1) FEATURES ===
+       label: [0, 1]
+       url_has_ip: [0, 1]
+     … +52 lines (ctrl+o to expand)
+
+● Bash(cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+      import pandas as pd…)
+  ⎿  domain_reg_length_flag: {-1: np.int64(208862)}
+     favicon_external: {-1: np.int64(208862)}
+     dns_record_exists: {-1: np.int64(208862)}
+     … +22 lines (ctrl+o to expand)
+
+● Now I have a complete picture. Here's the full breakdown:
+
+  ---
+  Dataset Overview
+
+  208,862 rows × 50 columns — This is a phishing/legitimate website detection dataset (balanced: 104,431 legitimate + 104,431 phishing URLs).
+
+  ---
+  Target Label
+
+  ┌─────────┬────────────────────────┬──────────────────────┐
+  │ Feature │         Values         │       Meaning        │
+  ├─────────┼────────────────────────┼──────────────────────┤
+  │ label   │ 0 = Legitimate website │ 1 = Phishing website │
+  └─────────┴────────────────────────┴──────────────────────┘
+
+  ---
+  Feature Groups & What They Mean
+
+  GROUP 1 — URL Structure Features (Binary: 0/1)
+
+  ┌───────────────────────────┬──────────────────────────────────┬─────────────────────────────────────────────────────────────┐
+  │          Feature          │               0 =                │                             1 =                             │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ url_has_ip                │ URL uses a domain name           │ URL uses an IP address instead of domain (suspicious)       │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ url_length_flag           │ URL length is normal (≤54 chars) │ URL is long (>54 chars, suspicious)                         │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ uses_url_shortener        │ No URL shortener used            │ Uses bit.ly, tinyurl, etc. (hides real destination)         │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ url_has_at_symbol         │ No @ in URL                      │ Has @ symbol (browser ignores everything before it)         │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ url_double_slash_redirect │ No // redirect                   │ Has // redirect in path (redirects to another site)         │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ url_prefix_suffix_dash    │ No dash in domain                │ Has - in domain name (e.g. payp-al.com)                     │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ url_subdomain_flag        │ ≤1 subdomains                    │ 2+ subdomains (e.g. login.bank.evil.com)                    │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ https_in_domain_token     │ No "https" text in domain        │ "https" word appears in the domain name itself (fake trust) │
+  ├───────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ url_has_suspicious_kw     │ No suspicious keywords           │ Contains words like "login", "secure", "update", "verify"   │
+  └───────────────────────────┴──────────────────────────────────┴─────────────────────────────────────────────────────────────┘
+
+  GROUP 2 — URL Count/Numeric Features (Continuous)
+
+  ┌────────────────────────┬───────────────────────────────────────────────────────────────┐
+  │        Feature         │                          Description                          │
+  ├────────────────────────┼───────────────────────────────────────────────────────────────┤
+  │ url_length             │ Raw character length of the full URL (range: 7–2314)          │
+  ├────────────────────────┼───────────────────────────────────────────────────────────────┤
+  │ url_subdomain_count    │ Number of subdomains (range: 0–19)                            │
+  ├────────────────────────┼───────────────────────────────────────────────────────────────┤
+  │ url_special_char_count │ Count of special characters like %, -, _, ?, = (range: 0–166) │
+  ├────────────────────────┼───────────────────────────────────────────────────────────────┤
+  │ url_dot_count          │ Number of dots in the full URL (range: 0–32)                  │
+  └────────────────────────┴───────────────────────────────────────────────────────────────┘
+
+  GROUP 3 — Domain Features (Binary: 0/1)
+
+  ┌─────────────────────┬───────────────────────────────┬───────────────────────────────────────────┐
+  │       Feature       │              0 =              │                    1 =                    │
+  ├─────────────────────┼───────────────────────────────┼───────────────────────────────────────────┤
+  │ domain_has_numerics │ Domain has no numbers         │ Domain contains numbers (e.g. paypa1.com) │
+  ├─────────────────────┼───────────────────────────────┼───────────────────────────────────────────┤
+  │ tld_suspicious      │ Normal TLD (.com, .org, .net) │ Suspicious TLD (.tk, .ml, .ga, .xyz etc.) │
+  └─────────────────────┴───────────────────────────────┴───────────────────────────────────────────┘
+
+  GROUP 4 — Domain Numeric Features (Continuous)
+
+  ┌──────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────┐
+  │     Feature      │                                         Description                                          │
+  ├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ domain_length    │ Length of the domain name only (range: 0–240)                                                │
+  ├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ domain_entropy   │ Shannon entropy of domain string — high entropy = random-looking, suspicious (range: 0–5.04) │
+  ├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ domain_dot_count │ Number of dots in the domain (range: 0–20)                                                   │
+  └──────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  GROUP 5 — SSL / Port Features (Binary: 0/1)
+
+  ┌───────────────────┬────────────────────────────────┬────────────────────────────────────────────┐
+  │      Feature      │              0 =               │                    1 =                     │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ ssl_final_state   │ No valid HTTPS/SSL certificate │ Has a valid SSL certificate                │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ non_standard_port │ Uses standard ports (80/443)   │ Uses non-standard port (e.g. :8080, :4443) │
+  └───────────────────┴────────────────────────────────┴────────────────────────────────────────────┘
+
+  ├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ domain_entropy   │ Shannon entropy of domain string — high entropy = random-looking, suspicious (range: 0–5.04) │
+  ├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ domain_dot_count │ Number of dots in the domain (range: 0–20)                                                   │
+  └──────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  GROUP 5 — SSL / Port Features (Binary: 0/1)
+
+  ┌───────────────────┬────────────────────────────────┬────────────────────────────────────────────┐
+  │      Feature      │              0 =               │                    1 =                     │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ ssl_final_state   │ No valid HTTPS/SSL certificate │ Has a valid SSL certificate                │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ non_standard_port │ Uses standard ports (80/443)   │ Uses non-standard port (e.g. :8080, :4443) │
+  └───────────────────┴────────────────────────────────┴────────────────────────────────────────────┘
+
+  ---
+  IMPORTANT: 25 Features Are All -1 (Completely Unavailable)
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for this dataset version. They carry zero predictive information:
+
+  │ domain_dot_count │ Number of dots in the domain (range: 0–20)                                                   │
+  └──────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  GROUP 5 — SSL / Port Features (Binary: 0/1)
+
+  ┌───────────────────┬────────────────────────────────┬────────────────────────────────────────────┐
+  │      Feature      │              0 =               │                    1 =                     │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ ssl_final_state   │ No valid HTTPS/SSL certificate │ Has a valid SSL certificate                │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ non_standard_port │ Uses standard ports (80/443)   │ Uses non-standard port (e.g. :8080, :4443) │
+  └───────────────────┴────────────────────────────────┴────────────────────────────────────────────┘
+
+  ---
+  IMPORTANT: 25 Features Are All -1 (Completely Unavailable)
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for this dataset version. They carry zero predictive information:
+
+  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious, html_submits_to_email, html_abnormal_url*, html_redirect_count,
+  html_status_bar_custom, html_disables_right_click, html_uses_popup, html_uses_iframe, html_form_count
+
+  Domain Reputation Features (all -1):
+  ---
+  IMPORTANT: 25 Features Are All -1 (Completely Unavailable)
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for this dataset
+  version. They carry zero predictive information:
+
+  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious, html_submits_to_email,
+  html_abnormal_url*, html_redirect_count, html_status_bar_custom, html_disables_right_click, html_uses_popuphtml_uses_iframe,
+  html_form_count
+
+  Domain Reputation Features (all -1):
+  domain_reg_length_flag, favicon_external, dns_record_exists, domain_age_flag, web_traffic_flag, pagerank_flag, google_index_flag,
+   links_pointing_flag, statistical_report_flag
+
+  Secondary/Sec_ Features (all -1):
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected /
+  unavailable for this dataset version. They carry zero predictive information:
+
+  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious,
+  html_submits_to_email, html_abnormal_url*, html_redirect_count, html_status_bar_custom,
+  html_disables_right_click, html_uses_popup, html_uses_iframe, html_form_count
+
+  Domain Reputation Features (all -1):
+  domain_reg_length_flag, favicon_external, dns_record_exists, domain_age_flag, web_traffic_flag,
+  pagerank_flag, google_index_flag, links_pointing_flag, statistical_report_flag
+
+  Secondary/Sec_ Features (all -1):
+  sec_domain_age_flag, sec_dns_record_exists, sec_web_traffic_flag, sec_links_pointing_flag,
+  sec_statistical_report_flag, sec_ssl_state, sec_tld_suspicious, sec_has_suspicious_kw*
+
+  html_disables_right_click, html_uses_popup, html_uses_iframe, html_form_count
+
+  Domain Reputation Features (all -1):
+  domain_reg_length_flag, favicon_external, dns_record_exists, domain_age_flag, web_traffic_flag,
+  pagerank_flag, google_index_flag, links_pointing_flag, statistical_report_flag
+
+  Secondary/Sec_ Features (all -1):
+  sec_domain_age_flag, sec_dns_record_exists, sec_web_traffic_flag, sec_links_pointing_flag,
+  sec_statistical_report_flag, sec_ssl_state, sec_tld_suspicious, sec_has_suspicious_kw*
+
+  ▎ *These few are binary 0/1 but in the sec_ prefix group — they represent secondary checks ofthe
+  statistical_report_flag
+
+  Secondary/Sec_ Features (all -1):
+  sec_domain_age_flag, sec_dns_record_exists, sec_web_traffic_flag, sec_links_pointing_flag,
+  │ domain_dot_count │ Number of dots in the domain (range: 0–20)                                                   │
+  └──────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  GROUP 5 — SSL / Port Features (Binary: 0/1)
+
+  ┌───────────────────┬────────────────────────────────┬────────────────────────────────────────────┐
+  │      Feature      │              0 =               │                    1 =                     │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ ssl_final_state   │ No valid HTTPS/SSL certificate │ Has a valid SSL certificate                │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │      Feature      │              0 =               │                    1 =                     │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ ssl_final_state   │ No valid HTTPS/SSL certificate │ Has a valid SSL certificate                │
+  ├───────────────────┼────────────────────────────────┼────────────────────────────────────────────┤
+  │ non_standard_port │ Uses standard ports (80/443)   │ Uses non-standard port (e.g. :8080, :4443) │
+  └───────────────────┴────────────────────────────────┴────────────────────────────────────────────┘
+
+  ---
+  IMPORTANT: 25 Features Are All -1 (Completely Unavailable)
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for this dataset version. They carry zero
+  ---
+  IMPORTANT: 25 Features Are All -1 (Completely Unavailable)
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for this dataset version. They
+  carry zero predictive information:
+
+  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious, html_submits_to_email, html_abnormal_url*,
+  html_redirect_count, html_status_bar_custom, html_disables_right_click, html_uses_popup, html_uses_iframe, html_form_count
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for this dataset
+  version. They carry zero predictive information:
+
+  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious, html_submits_to_email,
+  html_abnormal_url*, html_redirect_count, html_status_bar_custom, html_disables_right_click, html_uses_popup, html_uses_iframe,
+  html_form_count
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for
+  this dataset version. They carry zero predictive information:
+
+  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious, html_submits_to_email,
+  html_abnormal_url*, html_redirect_count, html_status_bar_custom, html_disables_right_click, html_uses_popup,
+  html_uses_iframe, html_form_count
+
+  Domain Reputation Features (all -1):
+  domain_reg_length_flag, favicon_external, dns_record_exists, domain_age_flag, web_traffic_flag, pagerank_fla  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious,
+  html_submits_to_email, html_abnormal_url*, html_redirect_count, html_status_bar_custom,
+  html_disables_right_click, html_uses_popup, html_uses_iframe, html_form_count
+
+  ---
+  IMPORTANT: 25 Features Are All -1 (Completely Unavailable)
+
+  These columns exist in the schema but every single row is -1, meaning the data was not collected / unavailable for this dataset version. They
+  carry zero predictive information:
+
+  HTML Content Features (all -1):
+  html_external_req_ratio, html_anchor_url_ratio, html_links_meta_script, html_sfh_suspicious, html_submits_to_email, html_abnormal_url*,
+  html_redirect_count, html_status_bar_custom, html_disables_right_click, html_uses_popup, html_uses_iframe, html_form_count
+
+  Domain Reputation Features (all -1):
+  domain_reg_length_flag, favicon_external, dns_record_exists, domain_age_flag, web_traffic_flag, pagerank_flag, google_index_flag,
+  links_pointing_flag, statistical_report_flag
+
+  Secondary/Sec_ Features (all -1):
+  sec_domain_age_flag, sec_dns_record_exists, sec_web_traffic_flag, sec_links_pointing_flag, sec_statistical_report_flag, sec_ssl_state,
+  sec_tld_suspicious, sec_has_suspicious_kw*
+
+  ▎ *These few are binary 0/1 but in the sec_ prefix group — they represent secondary checks of the same properties.
+
+  ---
+  Summary
+
+  - Usable features for ML: ~21 features (the URL structure, domain, and SSL ones)
+  - Dead features to drop: 25 features that are all -1 — these will hurt or add noise to any model
+  - The dataset is perfectly balanced: 50/50 phishing vs. legitimate, so no class imbalance handling needed
+
+  Recommendation: Drop all 25 constant -1 columns before training any model.
+
+✻ Crunched for 1m 24s
+
+❯ what are the working features
+
+● Bash(cd "C:\Users\imaze\Desktop\folder_final try\ML" && python -c "
+      import pandas as pd…)
+  ⎿  Total working features: 24
+
+       url_has_ip: [0, 1]  (2 unique values)
+     … +23 lines (ctrl+o to expand)
+
+● There are 24 working features (excluding label):
+
+  ---
+  Binary Features (0 or 1) — 17 features
+
+  ┌─────┬───────────────────────────┬────────────────────────────────────────────────────────┐
+  │  #  │          Feature          │                     What it checks                     │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 1   │ url_has_ip                │ URL uses an IP address instead of a domain name        │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 2   │ url_length_flag           │ URL length exceeds the suspicious threshold            │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 3   │ uses_url_shortener        │ URL uses a shortening service (bit.ly, tinyurl, etc.)  │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 4   │ url_has_at_symbol         │ @ symbol present in URL                                │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 5   │ url_double_slash_redirect │ // redirect present in URL path                        │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 6   │ url_prefix_suffix_dash    │ Dash - used in domain name                             │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 7   │ url_subdomain_flag        │ Has 2 or more subdomains                               │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 8   │ ssl_final_state           │ Website has a valid SSL certificate                    │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 9   │ non_standard_port         │ Uses a non-standard port (not 80/443)                  │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 10  │ https_in_domain_token     │ The word "https" appears inside the domain name        │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 11  │ url_has_suspicious_kw     │ URL contains keywords like "login", "secure", "verify" │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 12  │ domain_has_numerics       │ Domain name contains digits                            │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 13  │ tld_suspicious            │ Top-level domain is suspicious (.tk, .ml, .xyz, etc.)  │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 14  │ html_abnormal_url         │ URL in the HTML doesn't match the actual domain        │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 15  │ sec_ssl_state             │ Secondary SSL certificate check result                 │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 16  │ sec_tld_suspicious        │ Secondary TLD suspicion check                          │
+  ├─────┼───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ 17  │ sec_has_suspicious_kw     │ Secondary suspicious keyword check                     │
+  └─────┴───────────────────────────┴────────────────────────────────────────────────────────┘
+
+  ---
+  Continuous/Count Features — 7 features
+
+  ┌─────┬────────────────────────┬─────────────────────────────────────────────────────────────┬──────────┐
+  │  #  │        Feature         │                         Description                         │  Range   │
+  ├─────┼────────────────────────┼─────────────────────────────────────────────────────────────┼──────────┤
+  │ 1   │ url_length             │ Raw character length of full URL                            │ 7 – 2314 │
+  ├─────┼────────────────────────┼─────────────────────────────────────────────────────────────┼──────────┤
+  │ 2   │ url_subdomain_count    │ Number of subdomains                                        │ 0 – 19   │
+  ├─────┼────────────────────────┼─────────────────────────────────────────────────────────────┼──────────┤
+  │ 3   │ url_special_char_count │ Count of special chars (%, ?, =, -, _)                      │ 0 – 166  │
+  ├─────┼────────────────────────┼─────────────────────────────────────────────────────────────┼──────────┤
+  │ 4   │ url_dot_count          │ Number of dots in the full URL                              │ 0 – 32   │
+  ├─────┼────────────────────────┼─────────────────────────────────────────────────────────────┼──────────┤
+  │ 5   │ domain_length          │ Character length of domain only                             │ 0 – 240  │
+  ├─────┼────────────────────────┼─────────────────────────────────────────────────────────────┼──────────┤
+  │ 6   │ domain_entropy         │ Shannon entropy of domain string (high = random/suspicious) │ 0 – 5.04 │
+  ├─────┼────────────────────────┼─────────────────────────────────────────────────────────────┼──────────┤
+  │ 7   │ domain_dot_count       │ Number of dots in the domain                                │ 0 – 20   │
+  └─────┴────────────────────────┴─────────────────────────────────────────────────────────────┴──────────┘
+
+  ---
+  26 features are dead (all -1) and should be dropped before training. The 24 working features are all URL/domain-based — no HTML content
+  analysis was collected in this dataset version.
+
+✻ Brewed for 26s
+
+❯ do this working feature can be stracked form link if i provide , is it possible if then how
+
+● Yes, absolutely possible! Here's exactly how each feature maps to what you can extract from a URL:
+
+  ---
+  From the URL string alone (no network needed) — 21 features
+
+  ┌───────────────────────────┬─────────────────────────────────────────────────────────────────────────┐
+  │          Feature          │                             How to extract                              │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_has_ip                │ Regex check if domain is an IP like 192.168.1.1                         │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_length                │ len(url)                                                                │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_length_flag           │ 1 if len(url) > 54 else 0                                               │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ uses_url_shortener        │ Check domain against known shortener list (bit.ly, tinyurl, t.co, etc.) │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_has_at_symbol         │ '@' in url                                                              │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_double_slash_redirect │ Check for // after the initial https://                                 │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_prefix_suffix_dash    │ Check if - exists in the domain part                                    │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_subdomain_count       │ Parse domain, count subdomain levels                                    │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_subdomain_flag        │ 1 if subdomain_count >= 2 else 0                                        │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ non_standard_port         │ Parse port from URL — flag if not 80/443                                │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ https_in_domain_token     │ Check if "https" appears inside the domain string                       │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_special_char_count    │ Count % ? = - _ ~ $ ! & ' ( ) * + , ; @ in URL                          │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_has_suspicious_kw     │ Check for words: login, secure, verify, update, confirm, account, bank  │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ url_dot_count             │ url.count('.')                                                          │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ domain_length             │ len(extracted_domain)                                                   │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ domain_has_numerics       │ Check if domain contains any digit                                      │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ tld_suspicious            │ Check TLD against suspicious list (.tk, .ml, .ga, .cf, .xyz, .top)      │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ domain_entropy            │ Shannon entropy formula on domain string                                │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ domain_dot_count          │ Count dots in domain only                                               │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ sec_tld_suspicious        │ Same as tld_suspicious (secondary check)                                │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ sec_has_suspicious_kw     │ Same as url_has_suspicious_kw (secondary check)                         │
+  └───────────────────────────┴─────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  Requires making an HTTP/HTTPS request — 2 features
+
+  ┌─────────────────┬─────────────────────────────────────────────────────────────┐
+  │     Feature     │                       How to extract                        │
+  ├─────────────────┼─────────────────────────────────────────────────────────────┤
+  │ ssl_final_state │ Make an HTTPS request and check if SSL certificate is valid │
+  ├─────────────────┼─────────────────────────────────────────────────────────────┤
+  │ sec_ssl_state   │ Same check (secondary SSL verification)                     │
+  └─────────────────┴─────────────────────────────────────────────────────────────┘
+
+  ---
+  Requires fetching and parsing the HTML page — 1 feature
+
+  ┌───────────────────┬────────────────────────────────────────────────────────────────────────────────────┐
+  │      Feature      │                                   How to extract                                   │
+  ├───────────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+  │ html_abnormal_url │ Fetch page HTML, extract URLs inside <a> tags, check if they match the base domain │
+  └───────────────────┴────────────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  Bottom line
+
+  ┌──────────────────────┬───────┬────────────────────────────┐
+  │       Category       │ Count │           Needed           │
+  ├──────────────────────┼───────┼────────────────────────────┤
+  │ From URL string only │ 21    │ Just the URL text          │
+  ├──────────────────────┼───────┼────────────────────────────┤
+  │ Needs HTTP request   │ 2     │ requests or socket library │
+  ├──────────────────────┼───────┼────────────────────────────┤
+  │ Needs HTML parsing   │ 1     │ requests + BeautifulSoup   │
+  └──────────────────────┴───────┴────────────────────────────┘
+
+  All 24 features are fully extractable from a URL. Want me to write the Python extractor function that takes a URL and returns all 24 feature
+  values ready to feed into the model?
